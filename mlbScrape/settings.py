@@ -11,5 +11,5 @@ BOT_NAME = 'mlbScrape'
 SPIDER_MODULES = ['mlbScrape.spiders']
 NEWSPIDER_MODULE = 'mlbScrape.spiders'
 
-# Crawl responsibly by identifying yourself (and your website) on the user-agent
-#USER_AGENT = 'mlbScrape (+http://www.yourdomain.com)'
+# Unfortunately, we have to spoof the user agent...yahoo won't work otherwise
+USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.146 Safari/537.36'
