@@ -1,8 +1,10 @@
 from scrapy.spider import Spider
 from scrapy.selector import Selector
+from scrapy.http import Request
 from scrapy.http.request.form import FormRequest
 from mlbScrape.items import Batter, Pitcher
 from unidecode import unidecode
+import urlparse
 
 LEAGUE_ID = "ENTER LEAGUE ID HERE"
 YAHOO_USERNAME = "ENTER YAHOO USERNAME HERE"
@@ -22,19 +24,37 @@ class YahooSpider(Spider):
 
     start_urls = []
 
+    column_field_mapping = {}
+
     def parse(self, response):
-        return [FormRequest.from_response(response,
-                                          formdata={'login': YAHOO_USERNAME,
-                                                    'passwd': YAHOO_PASSWORD},
-                                          callback=self.after_login,
-                                          dont_filter=True,
-                                          dont_click=True)]
+        print "PARSING"
+        if 'Player List' in response.body:
+            return self.after_login(response)
+        else:
+            return [FormRequest.from_response(
+                response,
+                formdata={'login': YAHOO_USERNAME,
+                          'passwd': YAHOO_PASSWORD},
+                callback=self.parse_page,
+                dont_filter=True,
+                dont_click=True)]
 
-    def after_login(self, response):
-        pass
+    def parse_page(self, response):
+        hxs = Selector(response)
 
-    def uhoh(self, response):
-        pass
+        players = hxs.xpath(
+            '//div[contains(@class,"players")]/table/tbody/tr')
+
+        for item in self.getPlayerInfo(self.column_field_mapping, players):
+            yield item
+
+        next_page = hxs.xpath("//a[text()='Next 25']/@href").extract()
+
+        if len(next_page) > 0:
+            print "Requesting %s" % next_page[0]
+            yield Request(
+                urlparse.urljoin(response.url, next_page[0]),
+                callback=self.parse_page)
 
     def getPlayerInfo(self, column_field_mapping, players):
         players_arr = []
@@ -58,7 +78,8 @@ class YahooSpider(Spider):
                 r"sports.yahoo.com/mlb/players/([0-9]*)")[0]
 
             player_stats = player_row.xpath(
-                ".//td[contains(@class, 'Ta-end')]/div/text()")
+                ".//td[contains(@class, 'Ta-end')]").xpath(
+                ".//*[not(*)]/text()")
 
             for stat, (col, regex) in column_field_mapping.iteritems():
                 try:
@@ -80,26 +101,16 @@ class YahooProjBatters(YahooSpider):
     start_urls = [YahooSpider.url_root % (LEAGUE_ID, "B")]
     playerTypeCls = Batter
 
-    def after_login(self, response):
-
-        hxs = Selector(response)
-
-        players = hxs.xpath(
-            '//div[contains(@class,"players")]/table/tbody/tr')
-
-        column_field_mapping = {
-            "rank": (0, r'(.*)'),
-            "ab": (3, r'/(.*)'),
-            "h": (3, r'/(.*)'),
-            "r": (4, r'(.*)'),
-            "hr": (5, r'(.*)'),
-            "rbi": (6, r'(.*)'),
-            "sb": (7, r'(.*)'),
-            "avg": (8, r'(.*)')
-        }
-
-        return self.getPlayerInfo(column_field_mapping, players)
-
+    column_field_mapping = {
+        "rank": (0, r'(.*)'),
+        "ab": (3, r'/(.*)'),
+        "h": (3, r'/(.*)'),
+        "r": (4, r'(.*)'),
+        "hr": (5, r'(.*)'),
+        "rbi": (6, r'(.*)'),
+        "sb": (7, r'(.*)'),
+        "avg": (8, r'(.*)')
+    }
 
 # class YahooProjPitchers(YahooBaseball):
     #name = "mlb_yahoo_pitchers"
