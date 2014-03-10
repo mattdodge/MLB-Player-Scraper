@@ -13,12 +13,6 @@ YAHOO_PASSWORD = "ENTER YAHOO PASSWORD HERE"
 
 
 class YahooSpider(Spider):
-    db_host = "localhost"
-    db_user = "root"
-    db_passwd = "root"
-    db_name = "sports"
-    db_table = "mlb_2013_yahoo_proj"
-
     url_root = ("http://baseball.fantasysports.yahoo.com/b1/%s"
                 "/players?status=A&pos=%s&cut_type=33"
                 "&stat1=S_PSR&myteam=0&sort=OR&sdir=1")
