@@ -2,6 +2,7 @@ from scrapy.spider import Spider
 from scrapy.selector import Selector
 from scrapy.http import Request
 from scrapy.http.request.form import FormRequest
+import scrapy.log
 from mlbScrape.items import Batter, Pitcher
 from unidecode import unidecode
 import urlparse
@@ -27,7 +28,6 @@ class YahooSpider(Spider):
     column_field_mapping = {}
 
     def parse(self, response):
-        print "PARSING"
         if 'Player List' in response.body:
             return self.after_login(response)
         else:
@@ -51,7 +51,7 @@ class YahooSpider(Spider):
         next_page = hxs.xpath("//a[text()='Next 25']/@href").extract()
 
         if len(next_page) > 0:
-            print "Requesting %s" % next_page[0]
+            self.log("Requesting %s" % next_page[0], scrapy.log.INFO)
             yield Request(
                 urlparse.urljoin(response.url, next_page[0]),
                 callback=self.parse_page)
@@ -87,8 +87,9 @@ class YahooSpider(Spider):
                 except KeyError:
                     pass
                 except IndexError as e:
-                    print 'ERROR DETECTED for ' + player['name']
-                    print e
+                    self.log("ERROR DETECTED for %s" % player['name'],
+                             scrapy.log.ERROR)
+                    self.log(str(e), scrapy.log.ERROR)
 
             players_arr.append(player)
 
@@ -112,38 +113,19 @@ class YahooProjBatters(YahooSpider):
         "avg": (8, r'(.*)')
     }
 
-# class YahooProjPitchers(YahooBaseball):
-    #name = "mlb_yahoo_pitchers"
-    ##allowed_domains = ["baseball.fantasysports.yahoo.com","login.yahoo.com"]
-    #start_urls = []
-    # for i in range(200, 500, 25):
-        # start_urls.append(
-            #"http://baseball.fantasysports.yahoo.com/b1/4440/players?status=A&pos=P&cut_type=33&stat1=S_PSR&myteam=0&sort=OR&sdir=1&count=" + str(i)),
 
-    # def parse(self, response):
-        # if "Rankings" in response.body:
-            # return self.after_login(response)
+class YahooProjPitchers(YahooSpider):
 
-        # return FormRequest.from_response(response,
-                                         # formdata={'login': 'mdawg414',
-                                                   #'passwd': 'sportyguy123'},
-                                         # callback=self.after_login)
+    name = "yahooPitchers"
+    start_urls = [YahooSpider.url_root % (LEAGUE_ID, "P")]
+    playerTypeCls = Pitcher
 
-    # def after_login(self, response):
-        #hxs = HtmlXPathSelector(response)
-
-        # players = hxs.select(
-            #'//div[contains(@class,"players")]/table/tbody/tr')
-
-        # column_field_mapping = {
-            #'0': ('o_rank', r'^(.*)$'),
-            #'1': ('p_rank', r'^(.*)$'),
-            #'3': ('ip', r'^(.*)$'),
-            #'4': ('w', r'^(.*)$'),
-            #'5': ('sv', r'^(.*)$'),
-            #'6': ('k_p', r'^(.*)$'),
-            #'7': ('era', r'^(.*)$'),
-            #'8': ('whip', r'^(.*)$')
-        #}
-
-        # return getPlayerInfo(self, column_field_mapping, players)
+    column_field_mapping = {
+        "rank": (0, r'(.*)'),
+        "ip": (3, r'(.*)'),
+        "w": (4, r'(.*)'),
+        "sv": (5, r'(.*)'),
+        "k": (6, r'(.*)'),
+        "era": (7, r'(.*)'),
+        "whip": (8, r'(.*)')
+    }
