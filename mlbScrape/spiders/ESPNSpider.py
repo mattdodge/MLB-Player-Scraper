@@ -60,7 +60,8 @@ class ESPNSpider(Spider):
             player['id'] = playerInfoSel.re(r"playerid=\"([0-9]*)\"")[0]
 
             player_stats = player_row.xpath(
-                ".//tr[contains(@class, 'tableBody')][2]").xpath(
+                ".//tr[contains(@class, 'tableBody')][%s]" % (
+                    self.table_row, )).xpath(
                 ".//td[contains(@class, 'playertableStat')]/text()")
 
             for stat, (col, regex) in column_field_mapping.iteritems():
@@ -78,11 +79,12 @@ class ESPNSpider(Spider):
         return players_arr
 
 
-class ESPNProjBatters(ESPNSpider):
+class ESPNBatters(ESPNSpider):
 
-    name = "espnBatters"
+    name = "espnBatters2013"
     start_urls = [ESPNSpider.url_root % ("1",)]
     playerTypeCls = Batter
+    table_row = 1
 
     column_field_mapping = {
         "ab": (0, r'(.*)'),
@@ -98,11 +100,12 @@ class ESPNProjBatters(ESPNSpider):
     }
 
 
-class ESPNProjPitchers(ESPNSpider):
+class ESPNPitchers(ESPNSpider):
 
-    name = "espnPitchers"
+    name = "espnPitchers2013"
     start_urls = [ESPNSpider.url_root % ("2",)]
     playerTypeCls = Pitcher
+    table_row = 1
 
     column_field_mapping = {
         "games": (0, r'(.*)'),
@@ -117,3 +120,15 @@ class ESPNProjPitchers(ESPNSpider):
         "whip": (9, r'(.*)'),
         "k_per_9": (10, r'(.*)')
     }
+
+
+class ESPNProjBatters(ESPNBatters):
+
+    name = "espnBatters"
+    table_row = 2
+
+
+class ESPNProjPitchers(ESPNPitchers):
+
+    name = "espnPitchers"
+    table_row = 2

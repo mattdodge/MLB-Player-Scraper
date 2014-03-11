@@ -26,15 +26,18 @@ scrapy crawl <spider-name> -o output.csv -t csv
 
 
 ## Current Spiders
- - **yahooBatters**  
-   Yahoo 2014 Batter Projections (requires Yahoo league ID, username/pass)
- - **yahooPitchers**  
-   Yahoo 2014 Pitcher Projections (requires Yahoo league ID, username/pass)
+ - **espnBatters2013**  
+   ESPN 2013 Batter Stats
+ - **espnPitchers2013**  
+   ESPN 2013 Pitcher Stats
  - **espnBatters**  
    ESPN 2014 Batter Projections
  - **espnPitchers**  
    ESPN 2014 Pitcher Projections
- 
+ - **yahooBatters**  
+   Yahoo 2014 Batter Projections (requires Yahoo league ID, username/pass)
+ - **yahooPitchers**  
+   Yahoo 2014 Pitcher Projections (requires Yahoo league ID, username/pass)
 
 
 
