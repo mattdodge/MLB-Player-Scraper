@@ -48,8 +48,7 @@ class ESPNSpider(Spider):
             player['name'] = unidecode(playerInfoSel.xpath(
                 ".//a/text()").extract()[0])
 
-            player['rank'] = playerInfoSel.xpath("./text()").re(
-                r'(.*)\. ')[0]
+            player['rank'] = player_row.re(r"/players/full/([0-9]*).png")[0]
 
             player['team'] = playerInfoSel.xpath("./text()").re(
                 r', ([^ ]*) ')[0]
@@ -81,7 +80,7 @@ class ESPNSpider(Spider):
 
 class ESPNBatters(ESPNSpider):
 
-    name = "espnBatters2013"
+    name = "espnBatters2014"
     start_urls = [ESPNSpider.url_root % ("1",)]
     playerTypeCls = Batter
     table_row = 1
@@ -102,7 +101,7 @@ class ESPNBatters(ESPNSpider):
 
 class ESPNPitchers(ESPNSpider):
 
-    name = "espnPitchers2013"
+    name = "espnPitchers2014"
     start_urls = [ESPNSpider.url_root % ("2",)]
     playerTypeCls = Pitcher
     table_row = 1

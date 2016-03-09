@@ -42,4 +42,4 @@ scrapy crawl <spider-name> -o output.csv -t csv
 
 
 ## License
-Do whatever the hell you want with it.
+If you can get it to work, you can use it

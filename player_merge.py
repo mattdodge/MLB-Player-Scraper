@@ -1,6 +1,17 @@
 import argparse
 
 
+class PlayerMerger(object):
+
+    def __init__(self, files_to_merge, outfile):
+        self._input_files = files_to_merge
+        self._output_file = outfile
+
+    def merge(self):
+        with open(self._output_file, "w") as fo:
+            pass
+
+
 def get_command_line_args():
     """Set up the CLI arguments and return the values"""
 
@@ -32,4 +43,5 @@ def get_input_files(*args):
 if __name__ == '__main__':
     cli_args = get_command_line_args()
 
-    input_files = get_input_files(*cli_args.files)
+    merger = PlayerMerger(get_input_files(*cli_args.files), cli_args.outfile)
+    merger.merge()
